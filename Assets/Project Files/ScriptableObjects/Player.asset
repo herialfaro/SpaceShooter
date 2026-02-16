@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ce942a3217380e4582470af755ba7fb, type: 3}
   m_Name: Player
   m_EditorClassIdentifier: 
-  f_Speed: 1
+  f_Speed: 2
   f_HitPoints: 1
   f_CollisionDamagePoints: 1
   f_BulletCooldownTime: 0.5
