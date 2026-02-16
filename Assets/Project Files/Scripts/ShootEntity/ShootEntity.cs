@@ -9,16 +9,14 @@ public abstract class ShootEntity: MonoBehaviour, IShootEntity, IDamageable
     //ACCESS WILL BE REQUIRED BY CHILDREN
     protected Rigidbody2D _rb;
     protected float f_CurrentBulletForce;
+    protected float f_RemainingHitPoints;
+    protected float f_CurrentBulletCooldown;
     protected bool b_TripleBullets;
     protected BulletType e_CurrentBulletType;
 
     //INSPECTOR FIELDS
     [SerializeField] protected ShootEntityData _data;
     [SerializeField] private Transform _BulletOrigin;
-
-    //ACCESS WILL NOT BE REQUIRED BY CHILDREN
-    private float f_RemainingHitPoints;
-    private float f_CurrentBulletCooldown;
     #endregion
 
     #region Monobehaviour Methods

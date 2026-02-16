@@ -690,6 +690,7 @@ GameObject:
   m_Component:
   - component: {fileID: 622880675}
   - component: {fileID: 622880676}
+  - component: {fileID: 622880677}
   m_Layer: 0
   m_Name: SpaceShooterManager
   m_TagString: Untagged
@@ -735,6 +736,22 @@ MonoBehaviour:
   _EntityParentObject: {fileID: 1967407017}
   _MusicSource: {fileID: 474752787}
   _SFXSource: {fileID: 132916865}
+  _CountdownSecond: {fileID: 8300000, guid: 07f9bf9bc9409464b9b5e6465cec8c02, type: 3}
+  _CountdownReady: {fileID: 8300000, guid: 04ec1c345d79c4754ad12891fff69d65, type: 3}
+  i_InitialLives: 3
+  i_initialSeconds: 2
+--- !u!114 &622880677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622880674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 592da1e7ab725a444875cb42c4382a6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &660756774
 GameObject:
   m_ObjectHideFlags: 0

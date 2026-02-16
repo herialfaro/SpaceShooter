@@ -11,13 +11,13 @@ public class CanvasManager : MonoBehaviour
     // Start is called before the first frame update
     private void OnEnable()
     {
-        SpaceShooterManager.Instance.onPlayerWasDefeated += ShowGameOverScreen;
+        SpaceShooterManager.Instance.onGameOver += ShowGameOverScreen;
         SpaceShooterManager.Instance.onPlayerPaused += ShowPauseScreen;
     }
 
     private void OnDisable()
     {
-        SpaceShooterManager.Instance.onPlayerWasDefeated -= ShowGameOverScreen;
+        SpaceShooterManager.Instance.onGameOver -= ShowGameOverScreen;
         SpaceShooterManager.Instance.onPlayerPaused -= ShowPauseScreen;
     }
 

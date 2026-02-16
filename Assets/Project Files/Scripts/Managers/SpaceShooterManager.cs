@@ -4,10 +4,12 @@ using UnityEngine;
 using System.Collections;
 using DG.Tweening;
 
+[RequireComponent(typeof(ActiveEnemiesManager))]
 public class SpaceShooterManager : MonoBehaviour
 {
     #region Fields
     public static SpaceShooterManager Instance { get; private set; }
+    private ActiveEnemiesManager activeEnemiesManager;
 
     [field: SerializeField] public Transform _EntityReturnPool { get; private set; }
     [field: SerializeField] public Transform _PlayerSpawnPoint {  get; private set; }
@@ -15,13 +17,18 @@ public class SpaceShooterManager : MonoBehaviour
 
     [SerializeField] private Transform _EntityParentObject;
     [SerializeField] private AudioSource _MusicSource, _SFXSource;
+    [SerializeField] private AudioClip _CountdownSecond, _CountdownReady;
+
+    [SerializeField] private int i_InitialLives = 3;
+    [SerializeField] private int i_initialSeconds = 2;
 
     private List<GameObject> _entities;
     private List<GameObject> _shootEntities;
     private EntityInformation[] _pausedEntities;
     private bool b_IsPaused = false;
-    private bool b_PlayerIsReady = false;
     private bool b_GameStarted = false;
+    private int i_RemainingLives;
+    private int i_RemainingSeconds;
     #endregion
 
     #region Monobehaviour Methods
@@ -43,17 +50,22 @@ public class SpaceShooterManager : MonoBehaviour
         if (_EntityParentObject == null)
             return;
 
+        activeEnemiesManager = GetComponent<ActiveEnemiesManager>();
+
         InitializeGame();
     }
     #endregion
 
     #region Events
-    public event Action onPlayerWasDefeated;
+    public event Action onGameOver;
     public event Action onPlayerPaused;
-    public void PlayerWasDefeated()
+    public void GameOver()
     {
-        if(onPlayerWasDefeated != null)
-            onPlayerWasDefeated();
+        if(onGameOver != null)
+        {
+            onGameOver();
+            b_GameStarted = false;
+        }
     }
     public void PlayerPaused()
     {
@@ -74,6 +86,11 @@ public class SpaceShooterManager : MonoBehaviour
     public void PlaySFXClip(AudioClip clip) => _SFXSource?.PlayOneShot(clip);
     public void AddEntity(GameObject gameObject) => _entities.Add(gameObject);
     public void AddShootEntity(GameObject gameObject) => _shootEntities.Add(gameObject);
+    public void PlayerLostLife()
+    {
+        i_RemainingLives--;
+        StartCoroutine(WaitForPlayerToReturnCoroutine());
+    }
     #endregion
 
     #region Private Methods
@@ -81,6 +98,9 @@ public class SpaceShooterManager : MonoBehaviour
     private void ClearPauseEntityArray() => Array.Clear(_pausedEntities, 0, _pausedEntities.Length);
     private void InitializeGame()
     {
+        i_RemainingLives = i_InitialLives;
+        i_RemainingSeconds = i_initialSeconds;
+
         for (int i = 0; i < _EntityParentObject.childCount; i++)
         {
             IDamageable entity = _EntityParentObject.GetChild(i).GetComponent<IDamageable>();
@@ -97,6 +117,7 @@ public class SpaceShooterManager : MonoBehaviour
             }
         }
 
+        StartCoroutine(WaitForGameToStart());
         InitializePlayer();
     }
     private void InitializePlayer()
@@ -109,10 +130,6 @@ public class SpaceShooterManager : MonoBehaviour
     {
         GameObject player = GameObject.FindWithTag("Player");
         player.GetComponent<PlayableEntity>().enabled = b_Enable;
-    }
-    private void StartCountdown()
-    {
-
     }
     private void SaveEntitiesPositionAndVelocities()
     {
@@ -167,10 +184,43 @@ public class SpaceShooterManager : MonoBehaviour
     #region IEnums
     private IEnumerator PlayerPositionCoroutine(Transform _Player)
     {
-        Tween positionTween = _Player.DOMoveY(_Player.position.y + 3f, 0.5f).SetEase(Ease.Flash);
+        Tween positionTween = _Player.DOMoveY(_Player.position.y + 4f, 0.5f).SetEase(Ease.Flash);
         yield return positionTween.WaitForCompletion();
-        b_PlayerIsReady = true;
+        if (b_GameStarted)
+            EnablePlayerComponent(true);
+        else
+            StartCoroutine(WaitForCountdown());
+    }
+
+    private IEnumerator WaitForGameToStart()
+    {
+        yield return new WaitForSeconds(i_initialSeconds + 1.5f);
+        b_GameStarted = true;
         EnablePlayerComponent(true);
+    }
+
+    private IEnumerator WaitForCountdown()
+    {
+        PlaySFXClip(_CountdownSecond);
+        yield return new WaitForSeconds(1);
+        if (i_RemainingSeconds > 0)
+        {
+            i_RemainingSeconds--;
+            StartCoroutine(WaitForCountdown());
+        }
+        else
+        {
+            PlaySFXClip(_CountdownReady);
+        }
+    }
+
+    private IEnumerator WaitForPlayerToReturnCoroutine()
+    {
+        yield return new WaitForSeconds(3);
+        if (i_RemainingLives <= 0)
+            GameOver();
+        else
+            InitializePlayer();
     }
     #endregion
 }

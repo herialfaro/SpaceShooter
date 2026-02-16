@@ -9,6 +9,13 @@ public class PlayableEntity : ShootEntity
     #endregion
 
     #region Monobehaviour Methods
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+
+        f_CurrentBulletCooldown = 0;
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -50,7 +57,7 @@ public class PlayableEntity : ShootEntity
     {
         base.ReturnToPool();
 
-        SpaceShooterManager.Instance.PlayerWasDefeated();
+        SpaceShooterManager.Instance.PlayerLostLife();
         enabled = false;
     }
     #endregion
