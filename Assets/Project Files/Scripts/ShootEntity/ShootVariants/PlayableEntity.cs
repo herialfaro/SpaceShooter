@@ -29,6 +29,8 @@ public class PlayableEntity : ShootEntity
 
         if (_inputManager.b_Shoot)
             Shoot();
+
+        Reposition();
     }
 
     private void FixedUpdate()
@@ -46,9 +48,29 @@ public class PlayableEntity : ShootEntity
     #endregion
 
     #region Private Methods
-    public void Move()
+    private void Move()
     {
         _rb.MovePosition((Vector2)transform.position + _inputManager.v_Move * _data.f_Speed * Time.fixedDeltaTime);
+    }
+    #endregion
+
+    #region Protected Methods
+    protected override void Reposition()
+    {
+        base.Reposition();
+
+        //FIND LIMITS OF SCREEN AND REPOSITION PLAYER
+        if (this.transform.position.x > Camera.main.transform.position.x + Camera.main.orthographicSize * Camera.main.aspect)
+            this.transform.position = new Vector3(Camera.main.transform.position.x + Camera.main.orthographicSize * Camera.main.aspect, this.transform.position.y, 0.5f);
+
+        if (this.transform.position.x < Camera.main.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect)
+            this.transform.position = new Vector3(Camera.main.transform.position.x - Camera.main.orthographicSize * Camera.main.aspect, this.transform.position.y, 0.5f);
+
+        if (this.transform.position.y > Camera.main.transform.position.y + Camera.main.orthographicSize)
+            this.transform.position = new Vector3(this.transform.position.x, Camera.main.transform.position.y + Camera.main.orthographicSize, 0.5f);
+
+        if (this.transform.position.y < Camera.main.transform.position.y - Camera.main.orthographicSize)
+            this.transform.position = new Vector3(this.transform.position.x, Camera.main.transform.position.y - Camera.main.orthographicSize, 0.5f);
     }
     #endregion
 

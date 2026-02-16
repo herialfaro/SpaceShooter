@@ -53,6 +53,10 @@ public abstract class ShootEntity: MonoBehaviour, IShootEntity, IDamageable
     }
     #endregion
 
+    #region Protected Methods
+    protected virtual void Reposition() { }
+    #endregion
+
     #region Public Methods
     //SHOOT ACTION
     public virtual void Shoot()
@@ -76,6 +80,9 @@ public abstract class ShootEntity: MonoBehaviour, IShootEntity, IDamageable
             bullet_01.GetComponent<Rigidbody2D>().AddForce(this.transform.up * this.f_CurrentBulletForce, ForceMode2D.Impulse);
         }
 
+        //PLAY AUDIO
+        SpaceShooterManager.Instance.PlaySFXClip(_data._ShootClip);
+
         //RESET BULLET COOLDOWN TIMER
         f_CurrentBulletCooldown = _data.f_BulletCooldownTime;
     }
@@ -83,6 +90,8 @@ public abstract class ShootEntity: MonoBehaviour, IShootEntity, IDamageable
     public virtual void DamageItself(float f_Damage) 
     {
         f_RemainingHitPoints -= f_Damage;
+
+        SpaceShooterManager.Instance.PlaySFXClip(_data._DamageClip);
 
         if (f_RemainingHitPoints < 0)
             ReturnToPool();
@@ -93,7 +102,6 @@ public abstract class ShootEntity: MonoBehaviour, IShootEntity, IDamageable
     public virtual void ReturnToPool()
     {
         this.transform.position = SpaceShooterManager.Instance._EntityReturnPool.position;
-        //this.gameObject.SetActive(false);
     }
     //DESTROY SHOOT ENTITY
     public virtual void Remove() { Destroy(this.gameObject); }

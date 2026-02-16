@@ -5,29 +5,34 @@ using System.Collections;
 using DG.Tweening;
 
 [RequireComponent(typeof(ActiveEnemiesManager))]
+[RequireComponent(typeof(PauseInputManager))]
 public class SpaceShooterManager : MonoBehaviour
 {
     #region Fields
     public static SpaceShooterManager Instance { get; private set; }
     private ActiveEnemiesManager activeEnemiesManager;
+    private PauseInputManager pauseInputManager;
 
     [field: SerializeField] public Transform _EntityReturnPool { get; private set; }
     [field: SerializeField] public Transform _PlayerSpawnPoint {  get; private set; }
     [field: SerializeField] public GameObject[] bulletTypes { get; private set; }
+
+   public int i_RemainingLives { get; private set; }
+   public int i_CurrentScore { get; private set; }
 
     [SerializeField] private Transform _EntityParentObject;
     [SerializeField] private AudioSource _MusicSource, _SFXSource;
     [SerializeField] private AudioClip _CountdownSecond, _CountdownReady;
 
     [SerializeField] private int i_InitialLives = 3;
-    [SerializeField] private int i_initialSeconds = 2;
+    [SerializeField] private int i_InitialSeconds = 2;
+    [SerializeField] private int i_SpawnEnemySeconds = 5;
 
     private List<GameObject> _entities;
     private List<GameObject> _shootEntities;
     private EntityInformation[] _pausedEntities;
     private bool b_IsPaused = false;
     private bool b_GameStarted = false;
-    private int i_RemainingLives;
     private int i_RemainingSeconds;
     #endregion
 
@@ -51,14 +56,28 @@ public class SpaceShooterManager : MonoBehaviour
             return;
 
         activeEnemiesManager = GetComponent<ActiveEnemiesManager>();
+        pauseInputManager = GetComponent<PauseInputManager>();
 
         InitializeGame();
+    }
+
+    private void Update()
+    {
+
     }
     #endregion
 
     #region Events
+    public event Action onGameStart;
     public event Action onGameOver;
     public event Action onPlayerPaused;
+    public void GameStart()
+    {
+        if(onGameStart != null)
+        {
+            onGameStart();
+        }
+    }
     public void GameOver()
     {
         if(onGameOver != null)
@@ -69,6 +88,9 @@ public class SpaceShooterManager : MonoBehaviour
     }
     public void PlayerPaused()
     {
+        if (!b_GameStarted)
+            return;
+
         if(onPlayerPaused != null)
         {
             onPlayerPaused();
@@ -85,7 +107,9 @@ public class SpaceShooterManager : MonoBehaviour
     public void StopMusicAudioClip() => _MusicSource?.Stop();
     public void PlaySFXClip(AudioClip clip) => _SFXSource?.PlayOneShot(clip);
     public void AddEntity(GameObject gameObject) => _entities.Add(gameObject);
+    public void RemoveEntity(GameObject gameObject) => _entities.Remove(gameObject);
     public void AddShootEntity(GameObject gameObject) => _shootEntities.Add(gameObject);
+    public void AddScore(int i_score) => i_CurrentScore += i_score;
     public void PlayerLostLife()
     {
         i_RemainingLives--;
@@ -99,7 +123,8 @@ public class SpaceShooterManager : MonoBehaviour
     private void InitializeGame()
     {
         i_RemainingLives = i_InitialLives;
-        i_RemainingSeconds = i_initialSeconds;
+        i_RemainingSeconds = i_InitialSeconds;
+        i_CurrentScore = 0;
 
         for (int i = 0; i < _EntityParentObject.childCount; i++)
         {
@@ -113,11 +138,13 @@ public class SpaceShooterManager : MonoBehaviour
             {
                 GameObject g_ShootEntity = _EntityParentObject.GetChild(i).gameObject;
                 g_ShootEntity.GetComponent<ShootEntity>().InitializeDataValues();
-                _shootEntities.Add(g_ShootEntity);
+                AddShootEntity(g_ShootEntity);
             }
         }
 
         StartCoroutine(WaitForGameToStart());
+        StartCoroutine(WaitForNextEnemySpawn());
+        GameStart();
         InitializePlayer();
     }
     private void InitializePlayer()
@@ -147,7 +174,7 @@ public class SpaceShooterManager : MonoBehaviour
         foreach(var  entity in _entities)
         {
             entity.SetActive(false);
-            entity.transform.position = _EntityReturnPool.position;
+            entity.transform.localPosition = Vector3.zero;
             entity.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
         }
     }
@@ -158,7 +185,7 @@ public class SpaceShooterManager : MonoBehaviour
             if (_pausedEntities[i].b_Active)
             {
                 _entities[i].SetActive(true);
-                _entities[i].transform.position = _pausedEntities[i].v_Position;
+                _entities[i].transform.position = new Vector3(_pausedEntities[i].v_Position.x, _pausedEntities[i].v_Position.y, 0.5f);
                 _entities[i].GetComponent<Rigidbody2D>().velocity = _pausedEntities[i].v_Velocity;
             }
         }
@@ -169,6 +196,7 @@ public class SpaceShooterManager : MonoBehaviour
         {
             RestoreSavedEntities();
             ClearPauseEntityArray();
+            GameStart();
         }
         else
         {
@@ -194,7 +222,7 @@ public class SpaceShooterManager : MonoBehaviour
 
     private IEnumerator WaitForGameToStart()
     {
-        yield return new WaitForSeconds(i_initialSeconds + 1.5f);
+        yield return new WaitForSeconds(i_InitialSeconds + 1.5f);
         b_GameStarted = true;
         EnablePlayerComponent(true);
     }
@@ -221,6 +249,21 @@ public class SpaceShooterManager : MonoBehaviour
             GameOver();
         else
             InitializePlayer();
+    }
+
+    private IEnumerator WaitForNextEnemySpawn()
+    {
+        yield return new WaitForSeconds(i_SpawnEnemySeconds);
+        if (b_GameStarted)
+        {
+            if (!b_IsPaused)
+            {
+                activeEnemiesManager.CheckIfNextSpawnIsValid(_shootEntities);
+                
+            }
+
+            StartCoroutine(WaitForNextEnemySpawn());
+        }
     }
     #endregion
 }

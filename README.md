@@ -8,6 +8,14 @@ Editor de código Visual Studio 2022
 
 
 
+Controles:
+
+* Moverse - WASD
+* Disparar - Espacio
+* Pausar - P
+
+
+
 Este proyecto utiliza los siguientes paquetes externos instalados manualmente:
 
 

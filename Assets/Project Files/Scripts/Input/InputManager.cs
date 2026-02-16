@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(UnityEngine.InputSystem.PlayerInput))]
 public class InputManager : MonoBehaviour
 {
     #region Fields
-    private PlayerInput playerInput;
+    private UnityEngine.InputSystem.PlayerInput playerInput;
 
     public Vector2 v_Move { get; private set; }
     public bool b_Shoot { get; private set; }
@@ -17,11 +17,10 @@ public class InputManager : MonoBehaviour
     #region Monobehaviour Methods
     private void OnEnable()
     {
-        playerInput = GetComponent<PlayerInput>();
+        playerInput = GetComponent<UnityEngine.InputSystem.PlayerInput>();
         playerInput.actions["Move"].performed += PlayerMove;
         playerInput.actions["Shoot"].performed += PlayerIsShooting;
         playerInput.actions["Shoot"].canceled += PlayerStoppedShooting;
-        playerInput.actions["Pause"].started += PlayerMove;
     }
 
     private void OnDisable()
@@ -29,19 +28,6 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Move"].performed -= PlayerMove;
         playerInput.actions["Shoot"].performed -= PlayerIsShooting;
         playerInput.actions["Shoot"].canceled -= PlayerStoppedShooting;
-        playerInput.actions["Pause"].started -= PlayerMove;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
     #endregion
 
@@ -49,12 +35,6 @@ public class InputManager : MonoBehaviour
     public void PlayerMove(InputAction.CallbackContext context)
     {
         v_Move = context.ReadValue<Vector2>();
-    }
-
-    public void PlayerPause(InputAction.CallbackContext context)
-    {
-        if (context.started)
-            SpaceShooterManager.Instance.PlayerPaused();
     }
 
     public void PlayerIsShooting(InputAction.CallbackContext context)

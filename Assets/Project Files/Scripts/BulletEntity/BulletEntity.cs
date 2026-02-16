@@ -41,6 +41,10 @@ public class BulletEntity : MonoBehaviour, IDamageable
         return f_BulletDamage;
     }
     //DESTROY SHOOT ENTITY
-    public void Remove() { Destroy(this.gameObject); }
+    public void Remove() 
+    {
+        SpaceShooterManager.Instance.RemoveEntity(this.gameObject);
+        Destroy(this.gameObject); 
+    }
     #endregion
 }

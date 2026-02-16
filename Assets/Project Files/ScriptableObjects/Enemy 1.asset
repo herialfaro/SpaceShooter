@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ce942a3217380e4582470af755ba7fb, type: 3}
-  m_Name: Player
+  m_Name: Enemy 1
   m_EditorClassIdentifier: 
   f_Speed: 1
   f_HitPoints: 1
   f_CollisionDamagePoints: 1
-  f_BulletCooldownTime: 0.5
-  f_BulletForce: 4
+  f_BulletCooldownTime: 5
+  f_BulletForce: 5
   i_EntityPoints: 2000
   b_TripleBullets: 0
-  _ShootClip: {fileID: 8300000, guid: f040b99a6188a47f8ba1210fdc0f1cb9, type: 3}
-  _DamageClip: {fileID: 8300000, guid: c1a141f9e505b47e08b83c9cf0db5d60, type: 3}
+  _ShootClip: {fileID: 8300000, guid: bb260385bd8ec49548810e8ed79983ef, type: 3}
+  _DamageClip: {fileID: 8300000, guid: 8a107f42015674a5e975d15c3e9ba79b, type: 3}
   e_InitialBulletType: 1
